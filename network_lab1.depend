@@ -1,0 +1,51 @@
+# depslib dependency file v1.0
+1477087664 source:/home/mohamed/Desktop/comp_off/CS333F15Lab3/network_lab1/main.cpp
+	"server.h"
+	"stdio.h"
+
+1477088381 source:/home/mohamed/Desktop/comp_off/CS333F15Lab3/network_lab1/server.c
+	<sys/socket.h>
+	<sys/types.h>
+	<netdb.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<pthread.h>
+	"server.h"
+
+1477084630 /home/mohamed/Desktop/comp_off/CS333F15Lab3/network_lab1/server.h
+
+1477095560 source:/home/mohamed/Desktop/network_lab1/main.cpp
+	"server.h"
+	<stdio.h>
+	"client.h"
+
+1477084630 /home/mohamed/Desktop/network_lab1/server.h
+
+1477095703 source:/home/mohamed/Desktop/network_lab1/server.c
+	<sys/socket.h>
+	<sys/types.h>
+	<netdb.h>
+	<string.h>
+	<stdio.h>
+	<stdlib.h>
+	<pthread.h>
+	<unistd.h>
+	"server.h"
+
+1477096292 source:/home/mohamed/Desktop/network_lab1/client.c
+	"client.h"
+	<stdio.h>
+	<sys/socket.h>
+	<sys/types.h>
+	<netdb.h>
+	<string.h>
+	"server.h"
+
+1477096271 /home/mohamed/Desktop/network_lab1/client.h
+
+1477096246 source:/home/mohamed/Desktop/network_lab1/main.c
+	"server.h"
+	<stdio.h>
+	"client.h"
+
