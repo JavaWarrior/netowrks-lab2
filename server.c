@@ -51,11 +51,11 @@ void * handle_connection(void * args){
         /* post request */
         puts("POST");
         receivePOSTRequest(socketfd, buf, status);
+
     }else{
         perror("parsing error");
     }
     close(socketfd);
-
     // puts(buf);
 
     // free(buf);

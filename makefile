@@ -19,6 +19,10 @@ main_server: main_server.c
 debug_client: client_core utils sender main_client receiver
 	g++ -g client_core.o utils.o sender.o main_client.o receiver.o -o client_dbg -lpthread
 
+
+debug_server: server_core utils sender main_server  receiver
+	g++ -g server_core.o main_server.o utils.o sender.o receiver.o -o server_dbg -lpthread
+
 sender: sender.h sender.c
 	g++ -c  sender.c -o sender.o
 

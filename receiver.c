@@ -160,10 +160,15 @@ statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
 		/* response must be in form 'POST /x.x HTTP/1.1\r\nhost:x.x\r\ncontent-length: x\r\n\r\n' 55 char at least  */
 	}
 	char * filename = (char *) malloc(400);
+	if(filename == NULL){
+		perror("error writing to file");
+		return GENERROR;
+	}
 	sscanf(buf, "POST %s",filename);
-	
 	struct header hd = getContLength(buf, status);
 	int num = hd.contentLength;
+
+	printf("%s %d\b",filename, num);
 
 	if(num <= 0){
 		perror("Invalid Request");
@@ -174,7 +179,7 @@ statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
 
 
 	/*open new file */
-	FILE * fp = fopen(filename, "wb");
+	FILE * fp = fopen(filename, "wb+");
 	
 	if(!fp){
 		perror("could not write to file");
@@ -182,10 +187,12 @@ statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
 	}
 	
 	char * buf2 = (char *)malloc(num);			/* create new file of the size of the new data */
+
 	int indx = 0;
 	for(; indx < status - dataStart; indx++){
 		buf2[indx] = buf[indx + dataStart];
 	}
+
 	while(num - indx > 1){
 		status = recv(socketfd, (void *)(buf2+indx), num - indx, 0);
 		if(status <= 0) {
@@ -193,17 +200,17 @@ statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
 		}
 		indx += status;
 	}
+
 	/* receive all the file and write it*/
 	fwrite(buf2, num, 1, fp);
 
+	if(fp != NULL)
 	fclose(fp);
 
 	if(buf != NULL)
 		free(buf);
 	if(buf2 != NULL)
 		free(buf2);
-
-
 	return SUCCESS;
 
 }
