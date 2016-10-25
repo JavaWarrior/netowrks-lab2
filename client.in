@@ -1,3 +1,4 @@
 GET index.html example.com
 GET index.html beej.us
-GET default.html localhost 2000
+GET default.html 192.168.1.107 2000
+POST bab.jpg 192.168.1.107 2000

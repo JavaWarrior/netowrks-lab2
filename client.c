@@ -76,7 +76,7 @@ void startClient(){
             // recv(client_socketfd, buf, 1000, 0);
             // puts(buf);
             receiveGETResponse(client_socketfd, filename);
-        }else if(strcmp(command, "POST" == 0)){
+        }else if(strcmp(command, "POST" ) == 0){
             HTTPSendFile(filename, client_socketfd, POST);
             char * response = (char *) malloc(BUF_SIZE);
             recv(client_socketfd, response, BUF_SIZE, 0);

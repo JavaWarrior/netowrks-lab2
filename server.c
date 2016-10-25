@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "server.h"
+#include "receiver.h"
 
 #define PORTNUM "2000"  /*server port*/
 #define BACKLOG 10      /*server connection queue size */
