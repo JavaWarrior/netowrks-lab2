@@ -21,9 +21,9 @@ int getFileLength(FILE * fp){
 }
 
 /* send post header over socket */
-statusEnum sendPostHeader(char * filepath, int length, int socketfd){
+statusEnum sendPostHeader(char* hostname, char * filepath, int length, int socketfd){
 	char * buf = (char *) malloc(POST_HEAD_SIZE + sizeof(filepath));
-	length = sprintf(buf, "POST %s HTTP/1.1\r\nContent-Length: %d\r\n\r\n",filepath, length);
+	length = sprintf(buf, "POST %s HTTP/1.1\r\nHOST: %s\r\nContent-Length: %d\r\n\r\n",filepath, hostname, length);
 	puts(buf);
 	if(length > 0){
 		statusEnum status = sendChar(buf, length, socketfd);
@@ -38,7 +38,7 @@ statusEnum sendPostHeader(char * filepath, int length, int socketfd){
 statusEnum sendGet404Resp(int socketfd){
 	// char * buf = "HTTP/1.1 404 Not Found\r\n\r\n";
 	// return sendChar(buf, sizeof(buf), socketfd);
-	return HTTPSendFile("404.html", socketfd, GET);
+	return HTTPSendFile("","404.html", socketfd, GET);
 }
 
 /* send get found header */
@@ -86,7 +86,6 @@ statusEnum sendFile(FILE * fp, int socketfd, int length){
 				return status;
 			}
 			length -= CHUNK;
-
 		}else{
 			int x  = fread(buf, length, 1, fp);
 			statusEnum status = sendChar(buf, CHUNK, socketfd);
@@ -98,13 +97,13 @@ statusEnum sendFile(FILE * fp, int socketfd, int length){
 			length = 0;											/* all the file is sent*/
 		}
 	}
-	free(buf);
-	return SUCCESS;
+//	free(buf);
+return SUCCESS;
 }
 
 
 /* send any file over HTTP protocol */
-statusEnum HTTPSendFile(char * filepath, int socketfd, requestType reqType){
+statusEnum HTTPSendFile(char * hostname, char * filepath, int socketfd, requestType reqType){
 	FILE *fp = fopen(filepath,"rb");
 	if(!fp && reqType == POST) {
 		//file not found
@@ -124,11 +123,13 @@ statusEnum HTTPSendFile(char * filepath, int socketfd, requestType reqType){
 		return sendFile(fp, socketfd, length);				/*send file after that*/
 	}else if(reqType == POST){
 		/* post request */
-		statusEnum status = sendPostHeader(filepath, length, socketfd);
+		statusEnum status = sendPostHeader(hostname, filepath, length, socketfd);
 		if(status != SUCCESS){
 			perror("error sending post header");
 			return status;
 		}
+				
+		
 		return sendFile(fp, socketfd, length);
 	}
 

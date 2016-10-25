@@ -76,21 +76,28 @@ void startClient(){
             // recv(client_socketfd, buf, 1000, 0);
             // puts(buf);
             receiveGETResponse(client_socketfd, filename);
-        }else if(strcmp(command, "POST" ) == 0){
-            HTTPSendFile(filename, client_socketfd, POST);
-            char * response = (char *) malloc(BUF_SIZE);
-            recv(client_socketfd, response, BUF_SIZE, 0);
-            puts(response);
+        }else if(strcmp(command, "POST") == 0){
+	    puts(command);
+            HTTPSendFile(hostname, filename, client_socketfd, POST);
+
+            //char * response = (char *) malloc(BUF_SIZE);
+            //recv(client_socketfd, response, BUF_SIZE, 0);
+            //puts(response);
+	
         }else{
             perror("invalid command");
         }
+
         closeconnection(client_socketfd);
+
     }
+	
     free(command);
     free(filename);
     free(hostname);
     free(port);
     fclose(fp);
+	
 }
 
 statusEnum make_connection(char * hostname, char * portnum){
