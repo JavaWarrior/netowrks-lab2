@@ -132,6 +132,7 @@ void start_serverloop(){
             perror("accept error ");
             continue;
         }
+        printf("new connection\n");
         pthread_t * worker_thread = (pthread_t *) malloc(sizeof(pthread_t));
         struct con_handler_struct_args * args = (struct con_handler_struct_args *)malloc(sizeof(struct con_handler_struct_args));
         args->socketfd = client_fd;

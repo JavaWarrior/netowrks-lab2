@@ -24,8 +24,9 @@ int getFileLength(FILE * fp){
 statusEnum sendPostHeader(char * filepath, int length, int socketfd){
 	char * buf = (char *) malloc(POST_HEAD_SIZE + sizeof(filepath));
 	length = sprintf(buf, "POST %s HTTP/1.1\r\nContent-Length: %d\r\n\r\n",filepath, length);
+	puts(buf);
 	if(length > 0){
-		int status = sendChar(buf, length, socketfd);
+		statusEnum status = sendChar(buf, length, socketfd);
 		free(buf);
 		return status;
 	}
@@ -35,8 +36,9 @@ statusEnum sendPostHeader(char * filepath, int length, int socketfd){
 
 /* send not found response */
 statusEnum sendGet404Resp(int socketfd){
-	char * buf = "HTTP/1.1 404 Not Found\r\n\r\n";
-	return sendChar(buf, sizeof(buf), socketfd);
+	// char * buf = "HTTP/1.1 404 Not Found\r\n\r\n";
+	// return sendChar(buf, sizeof(buf), socketfd);
+	return HTTPSendFile("404.html", socketfd, GET);
 }
 
 /* send get found header */
@@ -45,13 +47,13 @@ statusEnum sendGetRespHeader(int length, int socketfd){
 	length = sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\n\r\n",length);
 
 	if(length > 0){
-		int status = sendChar(buf, length, socketfd);
+		statusEnum status = sendChar(buf, length, socketfd);
 		free(buf);
 		return status;
 	}
 	else{
 		free(buf);
-		return GENERROR;	
+		return GENERROR;
 	} 
 }
 
@@ -77,7 +79,7 @@ statusEnum sendFile(FILE * fp, int socketfd, int length){
 	while( length > 0 ){
 		if(length > CHUNK){
 			fread(buf, CHUNK, 1, fp);							/* read chunk of data in buffer */
-			int status = sendChar(buf, CHUNK, socketfd);		/* if send successfully continue else report it */
+			statusEnum status = sendChar(buf, CHUNK, socketfd);		/* if send successfully continue else report it */
 			if(status != SUCCESS){
 				perror("error happened during sending file");
 				free(buf);
@@ -87,8 +89,7 @@ statusEnum sendFile(FILE * fp, int socketfd, int length){
 
 		}else{
 			int x  = fread(buf, length, 1, fp);
-			printf("%d\n",x);
-			int status = sendChar(buf, CHUNK, socketfd);
+			statusEnum status = sendChar(buf, CHUNK, socketfd);
 			if(status != SUCCESS){
 				perror("error happened during sending file");
 				free(buf);
@@ -114,7 +115,7 @@ statusEnum HTTPSendFile(char * filepath, int socketfd, requestType reqType){
 	int length = getFileLength(fp);
 	if(reqType == GET){
 		/* responding to a GET request */
-		int status = sendGetRespHeader(length, socketfd);
+		statusEnum status = sendGetRespHeader(length, socketfd);
 		/* send header first `ok` */
 		if(status != SUCCESS){
 			perror("error sending get request response");
@@ -123,7 +124,7 @@ statusEnum HTTPSendFile(char * filepath, int socketfd, requestType reqType){
 		return sendFile(fp, socketfd, length);				/*send file after that*/
 	}else if(reqType == POST){
 		/* post request */
-		int status = sendPostHeader(filepath, length, socketfd);
+		statusEnum status = sendPostHeader(filepath, length, socketfd);
 		if(status != SUCCESS){
 			perror("error sending post header");
 			return status;
@@ -138,8 +139,9 @@ statusEnum HTTPSendFile(char * filepath, int socketfd, requestType reqType){
 statusEnum sendHTTPGET(char * hostname, char * filename,char * port, int socketfd){
 	char * buf = (char *) malloc(POST_HEAD_SIZE+sizeof(filename) + sizeof(hostname) + sizeof(port));
 	int length = sprintf(buf,"GET /%s HTTP/1.1\r\nHOST: %s:%s\r\n\r\n",filename, hostname, port);
+	puts(buf);
 	if(length > 0){
-		int status = sendChar(buf, length, socketfd);
+		statusEnum status = sendChar(buf, length, socketfd);
 		free(buf);
 		return status;
 	}

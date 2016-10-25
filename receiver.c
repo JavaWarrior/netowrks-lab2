@@ -117,7 +117,6 @@ statusEnum receiveGETResponse(int socketfd, char * filename){
 
 	int dataStart = hd.fileStart;
 
-
 	/*open new file */
 	FILE * fp = fopen(filename, "wb");
 	
@@ -125,6 +124,8 @@ statusEnum receiveGETResponse(int socketfd, char * filename){
 		perror("could not write to file");
 		return GENERROR;
 	}
+
+	printf("writing %d bytes to %s\n",num,  filename);
 	
 	char * buf2 = (char *)malloc(num);			/* create new file of the size of the new data */
 	int indx = 0;
@@ -207,7 +208,7 @@ statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
 
 statusEnum receiveGETRequest(int socketfd, char * buf, int status){
 	/* GET / HTTP/1.1\r\nhost:x.xx\r\n\r\n 32 character */
-	if(status < 55){
+	if(status < 32){
 		perror("invalid Request ");
 		return GENERROR;
 	}

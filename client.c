@@ -17,6 +17,8 @@
 #include "sender.h"
 #include "receiver.h"
 
+#include <unistd.h>
+
 #define BUF_SIZE 1000
 
 
@@ -54,14 +56,15 @@ void startClient(){
         return;
     }
     char * command = (char *) malloc(10), * filename = (char *) malloc(200), *hostname = (char *) malloc(200), * port = (char *) malloc(10);
-    char  buf[BUF_SIZE];
+    char  *buf;
+    size_t sz;
     while(1){
-        int ret = fgets(buf, BUF_SIZE, fp);
+        int ret = getline(&buf, &sz, fp);
         if(!buf || ret <= 0){
             break;
         }
         readCommand(buf, command, hostname, filename, port);
-        // printf("connecting to: %s on port %s requesting page %s\n",hostname, next, filename);
+        printf("connecting to: %s on port %s requesting page %s\n",hostname, port, filename);
         int status = make_connection(hostname, port);
         if(status != SUCCESS){
             return ;
@@ -73,7 +76,7 @@ void startClient(){
             // recv(client_socketfd, buf, 1000, 0);
             // puts(buf);
             receiveGETResponse(client_socketfd, filename);
-        }else if(!strcmp(command, "POST")){
+        }else if(strcmp(command, "POST" == 0)){
             HTTPSendFile(filename, client_socketfd, POST);
         }else{
             perror("invalid command");
