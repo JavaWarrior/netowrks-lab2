@@ -1,7 +1,7 @@
-//#ifndef ____CLIENT_HHH
-//#define ____CLIENT_HHH
+#ifndef ____CLIENT_HHH
+#define ____CLIENT_HHH
 
 
-void startsend();
+void startClient();
 
-//#endif // ____CLIENT_HHH
+#endif // ____CLIENT_HHH

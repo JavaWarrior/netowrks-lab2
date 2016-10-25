@@ -1,7 +1,7 @@
 #ifndef ____SERVER_H
 #define ____SERVER_H
 
-typedef enum {SUCCESS, GENERROR} statusEnum;
+#include "errorStruct.h"
 
 statusEnum init_server();
 statusEnum startServer();

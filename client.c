@@ -2,6 +2,7 @@
 #include "client.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 
 #include <sys/socket.h>
@@ -12,64 +13,94 @@
 #include <string.h>
 
 
-#include "server.h"
-
+#include "errorStruct.h"
+#include "sender.h"
+#include "receiver.h"
 
 #define BUF_SIZE 1000
 
 
 int client_socketfd = 0;
 
-statusEnum init_client(char * hostip, char * portnum);
+statusEnum make_connection(char * hostip, char * portnum);
 
-
-
-void startsend(){
-    FILE * fp = fopen("client.in","r");
-    if(!fp){
-        return;
-    }
-    char buf[BUF_SIZE];
-    getline(&buf, BUF_SIZE, fp);
-
-    char command[5], filename[200], hostname[200], port[7];
-
-    strcpy(command, strtok(buf, " "));
-    strcpy(filename, strtok(NULL, " "));
-    strcpy(hostname, strtok(NULL, " "));
-    char * next = strtok(NULL, " ");
+/* tokenize line 'buf' to fill hostaname, port, filename */
+void readCommand(char * buf,char * command,  char * hostname, char* filename, char * port){
+    char * next ;
+    next = strtok(buf, " \n");
+    strcpy(command, next);
+    next = strtok(NULL, " \n");
+    strcpy(filename, next);
+    next = strtok(NULL, " \n");
+    strcpy(hostname, next);
+    next = strtok(NULL, " \n");
     if(next != NULL){
-        strcpy(filename, next);
+        strcpy(port, next);
     }else{
         strcpy(port, "80");
     }
-
-    int status = init_client(hostname, port);
-    if(status != SUCCESS){
-        perror("error in connecting to server ");
-        return ;
-    }
-    if(strcmp(command, "GET") == 0){
-        char full_cmd[1000];
-        full_cmd[0] = 0;
-        sprintf(full_cmd, "GET /%s HTTP/1.1\r\nHOST: %s:%s\r\n\r\n",filename, hostname, port);
-        send(client_socketfd, full_cmd, sizeof(full_cmd), 0);
-        recv(client_socketfd, buf, 1000, 0);
-        puts(buf);
-    }
-
 }
 
-statusEnum init_client(char * hostip, char * portnum){
+void closeconnection(int socketfd){
+     close(socketfd);
+}
+
+/* start main client function, reads from input file and process requests */
+void startClient(){
+    FILE * fp = fopen("client.in","r");
+    /* read instructions for client */
+
+    if( fp == NULL){
+        return;
+    }
+    char * command = (char *) malloc(10), * filename = (char *) malloc(200), *hostname = (char *) malloc(200), * port = (char *) malloc(10);
+    char  buf[BUF_SIZE];
+    while(1){
+        int ret = fgets(buf, BUF_SIZE, fp);
+        if(!buf || ret <= 0){
+            break;
+        }
+        readCommand(buf, command, hostname, filename, port);
+        // printf("connecting to: %s on port %s requesting page %s\n",hostname, next, filename);
+        int status = make_connection(hostname, port);
+        if(status != SUCCESS){
+            return ;
+        }
+
+        puts("connection established ");
+        if(strcmp(command, "GET") == 0){
+            sendHTTPGET(hostname, filename, port, client_socketfd);
+            // recv(client_socketfd, buf, 1000, 0);
+            // puts(buf);
+            receiveGETResponse(client_socketfd, filename);
+        }else if(!strcmp(command, "POST")){
+            HTTPSendFile(filename, client_socketfd, POST);
+        }else{
+            perror("invalid command");
+        }
+        closeconnection(client_socketfd);
+    }
+    free(command);
+    free(filename);
+    free(hostname);
+    free(port);
+    fclose(fp);
+}
+
+statusEnum make_connection(char * hostname, char * portnum){
+    
     int status;                             /* server addressinfo status */
     struct addrinfo hints, *res;            /* hints to be used in getaddrinfo */
+    
     memset(&hints,0,sizeof(hints));         /* make sure hints is clear */
     hints.ai_family = AF_INET;              /* server will work on ipv4 */
     hints.ai_socktype = SOCK_STREAM;        /* TCP for SOCK_STREAM and UDP for SOCK_DGRAM*/
-    status = getaddrinfo(hostip, portnum, &hints, &res);
+    
+    printf("%s\n",hostname);
+    status = getaddrinfo(hostname, portnum, &hints, &res);
                                             /* fill addrinfo for us */
     /* if error happened print it*/
-    if(status || res == NULL){
+    if(status != 0){
         fprintf(stderr, "getaddrsinfo() error: %s\n", gai_strerror(status));
         return GENERROR;
     }
