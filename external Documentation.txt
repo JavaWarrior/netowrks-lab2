@@ -1,0 +1,18 @@
+external Documentation:
+
+overall organization:
+the code is divided into 4 groups:
+	client/server: runs the high level code responsible for maintaining the general loop of the system.
+	sender/receiver: a group of function to send and receive from any user to the other.
+	main_x: code responsible for running client/server.
+	utilities: utility functions. ex: getCurrentSeconds().
+
+
+major data structures used: stored in errorStruct.h a struct for representing request and one for error handling.
+
+major functions:
+1. HTTPSENDFILE(): sends anyfile using HTTP in case of POST or GET response for both client and server.
+2. sendFile(): sends any file over tcp.
+3. receiveGETResponse(): parsing GET response to extract files from it.
+4. receivePOSTRequest(): parses POST request to extract file name and size before uploading it to server.
+5. sendChar(): sends any character array over tcp.
