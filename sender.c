@@ -35,7 +35,7 @@ statusEnum sendPostHeader(char * filepath, int length, int socketfd){
 
 /* send not found response */
 statusEnum sendGet404Resp(int socketfd){
-	char * buf = "HTTP/1.0 404 Not Found\r\n\r\n";
+	char * buf = "HTTP/1.1 404 Not Found\r\n\r\n";
 	return sendChar(buf, sizeof(buf), socketfd);
 }
 

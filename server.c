@@ -126,7 +126,6 @@ void start_serverloop(){
     int client_fd;                          /* client socket descriptor */
     while(1){
     /* server main loop */
-        printf("1\n");
         sock_size = sizeof(client_addr);
         client_fd = accept(server_socketfd, (struct sockaddr *)&client_addr, &sock_size); /* accept connection */
         if(client_fd == -1){
