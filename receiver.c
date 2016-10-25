@@ -222,6 +222,6 @@ statusEnum receiveGETRequest(int socketfd, char * buf, int status){
 	
 	/* we've known the file name, now we send it back */
 	filename++; //advance pointer so we ignore the slash 
-	HTTPSendFile(filename, socketfd, GET);
+	HTTPSendFile("", filename, socketfd, GET);
 
 }
