@@ -58,7 +58,7 @@ void * handle_connection(void * args){
 
     // puts(buf);
 
-    free(buf);
+    // free(buf);
     pthread_exit(NULL);
     return NULL;
 }

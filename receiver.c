@@ -202,6 +202,8 @@ statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
 		free(buf);
 	if(buf2 != NULL)
 		free(buf2);
+
+
 	return SUCCESS;
 
 }
