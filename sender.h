@@ -3,7 +3,7 @@
 
 #include "errorStruct.h"
 
-#define CHUNK 1000 /*chunk size*/
+#define CHUNK 10000 /*chunk size*/
 #define TIMEOUT 5LL
 
 statusEnum HTTPSendFile(char * filepath, int socketfd, requestType reqType);

@@ -33,28 +33,31 @@ pthread_mutex_t printmutex;
 
 
 void * handle_connection(void * args){
-    int socketfd = ((con_handler_struct_args *)args)->socketfd;
-    pthread_mutex_lock(&printmutex);
-    puts("connection established !");
-    pthread_mutex_unlock(&printmutex);
-    char buf[BUF_SIZE];
+    int socketfd = ((struct con_handler_struct_args *)args)->socketfd;
+    char * buf = (char *) malloc(BUF_SIZE);
     int status = recv(socketfd, buf, BUF_SIZE, 0);
     if(status == -1){
         fprintf(stderr, "error receiving from client !\n");
         fprintf(stderr, "%s\n", gai_strerror(status));
-//        pthread_exit(NULL);
+       pthread_exit(NULL);
     }
-    pthread_mutex_lock(&printmutex);
-    puts(buf);
-    pthread_mutex_unlock(&printmutex);
+    if(buf[0] == 'G'){
+        /* get request */
+        puts("GET");
+        receiveGETRequest(socketfd, buf, status);
 
-    char buf2[] = "<html> lol </html>\r\n";
-    status = send(socketfd, buf2, sizeof(buf2), 0);
-    if(status == -1){
-        fprintf(stderr, "error sending to client !\n");
+    }else if (buf[0] == 'P'){
+        /* post request */
+        puts("POST");
+        receivePOSTRequest(socketfd, buf, status);
+    }else{
+        perror("parsing error");
     }
-
     close(socketfd);
+
+    // puts(buf);
+
+    free(buf);
     pthread_exit(NULL);
     return NULL;
 }
@@ -123,6 +126,7 @@ void start_serverloop(){
     int client_fd;                          /* client socket descriptor */
     while(1){
     /* server main loop */
+        printf("1\n");
         sock_size = sizeof(client_addr);
         client_fd = accept(server_socketfd, (struct sockaddr *)&client_addr, &sock_size); /* accept connection */
         if(client_fd == -1){

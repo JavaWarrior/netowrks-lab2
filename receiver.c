@@ -1,4 +1,5 @@
 #include "receiver.h"
+#include "sender.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,7 +91,7 @@ statusEnum receiveGETResponse(int socketfd, char * filename){
 		return GENERROR;
 		/* response must be in form 'HTTP/1.0 xxx OK\r\n\r\n' 19 char at least  */
 	}
-	status = recv(socketfd, buf, BUF_INIT_SIZE, MSG_WAITALL); /* make sure to get the exact response */
+	status = recv(socketfd, buf, BUF_INIT_SIZE, 0); /* make sure to get the exact response */
 	int resp;
 	sscanf(buf, "HTTP/1.1 %d",&resp);
 	// printf("%d\n",resp);
@@ -150,6 +151,76 @@ statusEnum receiveGETResponse(int socketfd, char * filename){
 }
 /* to do later: live buffering */
 
-statusEnum receivePOSTResponse(int socketfd, char * filename){
+statusEnum receivePOSTRequest(int socketfd, char * buf, int status){
+	/* receive response */
+	if(status < 55){
+		perror("invalid Request ");
+		return GENERROR;
+		/* response must be in form 'POST /x.x HTTP/1.1\r\nhost:x.x\r\ncontent-length: x\r\n\r\n' 55 char at least  */
+	}
+	char * filename = (char *) malloc(400);
+	sscanf(buf, "POST %s",filename);
 	
+	struct header hd = getContLength(buf, status);
+	int num = hd.contentLength;
+
+	if(num <= 0){
+		perror("Invalid Request");
+		return GENERROR;
+	}
+
+	int dataStart = hd.fileStart;
+
+
+	/*open new file */
+	FILE * fp = fopen(filename, "wb");
+	
+	if(!fp){
+		perror("could not write to file");
+		return GENERROR;
+	}
+	
+	char * buf2 = (char *)malloc(num);			/* create new file of the size of the new data */
+	int indx = 0;
+	for(; indx < status - dataStart; indx++){
+		buf2[indx] = buf[indx + dataStart];
+	}
+	while(num - indx > 1){
+		status = recv(socketfd, (void *)(buf2+indx), num - indx, 0);
+		if(status <= 0) {
+			return GENERROR;
+		}
+		indx += status;
+	}
+	/* receive all the file and write it*/
+	fwrite(buf2, num, 1, fp);
+
+	fclose(fp);
+
+	if(buf != NULL)
+		free(buf);
+	if(buf2 != NULL)
+		free(buf2);
+	return SUCCESS;
+
+}
+
+statusEnum receiveGETRequest(int socketfd, char * buf, int status){
+	/* GET / HTTP/1.1\r\nhost:x.xx\r\n\r\n 32 character */
+	if(status < 55){
+		perror("invalid Request ");
+		return GENERROR;
+	}
+	char * filename = (char *) malloc(400);
+	sscanf(buf, "GET %s",filename);
+
+	if(strcmp(filename,"/") ==0){
+		filename = "/default.html";
+	}
+	
+	
+	/* we've known the file name, now we send it back */
+	filename++; //advance pointer so we ignore the slash 
+	HTTPSendFile(filename, socketfd, GET);
+
 }
